@@ -45,70 +45,67 @@ Website made by Christopher Tarry. Email and other contact info is available on 
 <p>
   One way to filter this data down a lot more if you were looking for something like phishing domains would be to add in WHOIS data and actually resolve the domain IP addresses.  There are certain registrars and hosts that are higher risk than others.
 </p>
-<p>
-  <pre class="default prettyprint prettyprinted" style="">
-    Example filter 1:
-    <code>
-    const domain = parsed["domain"];
-    const issuer = parsed["issuer"];
-    const split = domain.split(".");
-    // Technically you should use the public suffixes list...
-    const tld = split[split.length - 1];
+<pre class="default prettyprint prettyprinted" style="">
+  Example filter 1:
+  <code>
+  const domain = parsed["domain"];
+  const issuer = parsed["issuer"];
+  const split = domain.split(".");
+  // Technically you should use the public suffixes list...
+  const tld = split[split.length - 1];
 
-    let riskScore = 0;
-    if (tld === "top" || tld === "co") {
-      riskScore += 5;
+  let riskScore = 0;
+  if (tld === "top" || tld === "co") {
+    riskScore += 5;
+  }
+  if (issuer.indexOf("Let's Encrypt") !== -1) {
+    riskScore += 5;
+  }
+  return riskScore > 5;
+  </code>
+
+  Example filter 2:
+  <code>
+  const substrings = ["paypal", "chase", "fidelity", "vanguard"];
+  for (const substring of substrings) {
+    if (includesSubstring(parsed["domain"], substring)) {
+      return true;
     }
-    if (issuer.indexOf("Let's Encrypt") !== -1) {
-      riskScore += 5;
+  }
+  return false;
+  </code>
+
+  Example filter 3:
+  <code>
+  const substrings = ["coinbase", "binance", "bitfinex", "bybit"];
+  for (const substring of substrings) {
+    if (includesSubstringWithLevenshtein(parsed["domain"], substring, 2)) {
+      return true;
     }
-    return riskScore > 5;
-    </code>
+  }
+  return false;
+  </code>
 
-    Example filter 2:
-    <code>
-    const substrings = ["paypal", "chase", "fidelity", "vanguard"];
-    for (const substring of substrings) {
-      if (includesSubstring(parsed["domain"], substring)) {
-        return true;
-      }
-    }
-    return false;
-    </code>
+  Examples:
+  <code>
+    // Examples:
+    // includesSubstring("coinbase-support.com", "coinbase") = true
+    // includesSubstring("coinbase-support.com", "co1nb4se") = false
 
-    Example filter 3:
-    <code>
-    const substrings = ["coinbase", "binance", "bitfinex", "bybit"];
-    for (const substring of substrings) {
-      if (includesSubstringWithLevenshtein(parsed["domain"], substring, 2)) {
-        return true;
-      }
-    }
-    return false;
-    </code>
+    // Examples:
+    // includesSubstringWithLevenshtein("coinbase-support.com", "coinbase", 0) = true
+    // includesSubstringWithLevenshtein("coinbase-support.com", "coinbase", 1) = true
+    // includesSubstringWithLevenshtein("coinbase-support.com", "coinbase", 2) = true
 
-    Examples:
-    <code>
-      // Examples:
-      // includesSubstring("coinbase-support.com", "coinbase") = true
-      // includesSubstring("coinbase-support.com", "co1nb4se") = false
+    // includesSubstringWithLevenshtein("co1nbase-support.com", "coinbase", 0) = false
+    // includesSubstringWithLevenshtein("co1nbase-support.com", "coinbase", 1) = true
+    // includesSubstringWithLevenshtein("co1nbase-support.com", "coinbase", 2) = true
 
-      // Examples:
-      // includesSubstringWithLevenshtein("coinbase-support.com", "coinbase", 0) = true
-      // includesSubstringWithLevenshtein("coinbase-support.com", "coinbase", 1) = true
-      // includesSubstringWithLevenshtein("coinbase-support.com", "coinbase", 2) = true
-
-      // includesSubstringWithLevenshtein("co1nbase-support.com", "coinbase", 0) = false
-      // includesSubstringWithLevenshtein("co1nbase-support.com", "coinbase", 1) = true
-      // includesSubstringWithLevenshtein("co1nbase-support.com", "coinbase", 2) = true
-
-      // includesSubstringWithLevenshtein("co1nb4se-support.com", "coinbase", 0) = false
-      // includesSubstringWithLevenshtein("co1nb4se-support.com", "coinbase", 1) = false
-      // includesSubstringWithLevenshtein("co1nb4se-support.com", "coinbase", 2) = true
-    </code>
-
-  </pre>
-</p>
+    // includesSubstringWithLevenshtein("co1nb4se-support.com", "coinbase", 0) = false
+    // includesSubstringWithLevenshtein("co1nb4se-support.com", "coinbase", 1) = false
+    // includesSubstringWithLevenshtein("co1nb4se-support.com", "coinbase", 2) = true
+  </code>
+</pre>
 </div>
 
 </body>
