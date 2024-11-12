@@ -25,7 +25,7 @@ use warp::{
 use x509_parser::prelude::*;
 
 const ENTRIES_PER_REQUEST: usize = 16;
-const REQUEST_SLEEP_TIME: Duration = Duration::from_secs(2);
+const REQUEST_SLEEP_TIME: Duration = Duration::from_secs(1);
 /// If we see the same domain within 10 minutes, ignore it
 const IGNORE_DUPLICATE_TIME: Duration = Duration::from_secs(60 * 10);
 /// Maximum age of timestamp in milliseconds
@@ -318,14 +318,6 @@ async fn main() {
         let mut seen: HashMap<String, Instant> = HashMap::new();
 
         while let Some(parsed_entry) = entry_rx.recv().await {
-            let current_epoch = SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_millis();
-            if (u128::from(parsed_entry.timestamp) + MAX_ENTRY_AGE) < current_epoch {
-                continue;
-            }
-
             let now = Instant::now();
             if let Some(last_seen) = seen.get(&parsed_entry.domain) {
                 // If we have seen a domain in the past IGNORE_DUPLICATE_TIME,
